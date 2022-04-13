@@ -36,3 +36,8 @@ export const get = {
   mock: [homer, ragnar, eren, morty],
   response: [homer, ragnar, eren, morty],
 };
+
+export const getId = {
+  mock: eren,
+  response: eren,
+};
