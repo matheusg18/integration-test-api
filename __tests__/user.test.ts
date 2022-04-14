@@ -316,3 +316,151 @@ describe('POST /user', () => {
     });
   });
 });
+
+describe('PUT /user/:id', () => {
+  describe('caso o usuário exista', () => {
+    before(() => {
+      sinon.stub(UserRepository.prototype, 'update').resolves(fakeData.put.mock);
+      sinon.stub(UserRepository.prototype, 'getById').resolves(fakeData.put.getByIdMock);
+      sinon.stub(Logger, 'save').resolves();
+    });
+
+    after(() => {
+      (UserRepository.prototype.update as sinon.SinonStub).restore();
+      (UserRepository.prototype.getById as sinon.SinonStub).restore();
+      (Logger.save as sinon.SinonStub).restore();
+    });
+
+    it('deve retornar o usuário atualziado e enviar status 200', async () => {
+      // id = 2 -> ragnar
+      const { status, body } = await chai.request(app).put('/user/2 ').send(fakeData.put.request);
+
+      expect(status).to.be.equal(200);
+      expect(body).to.be.an('object');
+      expect(body).to.be.deep.equal(fakeData.put.response);
+      expect((Logger.save as sinon.SinonStub).calledWith('update() success')).to.be.true;
+    });
+  });
+
+  describe('caso o usuário não exista', () => {
+    before(() => {
+      sinon.stub(UserRepository.prototype, 'update').resolves(fakeData.put.mock);
+      sinon.stub(UserRepository.prototype, 'getById').resolves(null);
+      sinon.stub(Logger, 'save').resolves();
+    });
+
+    after(() => {
+      (UserRepository.prototype.update as sinon.SinonStub).restore();
+      (UserRepository.prototype.getById as sinon.SinonStub).restore();
+      (Logger.save as sinon.SinonStub).restore();
+    });
+
+    it('deve retornar a mensagem do erro e enviar status 404', async () => {
+      // id = 9999
+      const { status, body } = await chai.request(app).put('/user/9999').send(fakeData.put.mock);
+
+      expect(status).to.be.equal(404);
+      expect(body).to.have.property('error');
+      expect(body.error.message).to.be.equal('user not found');
+      expect((Logger.save as sinon.SinonStub).calledWith('update() fail')).to.be.true;
+    });
+  });
+
+  describe('em caso de erro no banco de dados', () => {
+    before(() => {
+      sinon.stub(UserRepository.prototype, 'update').throws(new Error('db error'));
+      sinon.stub(UserRepository.prototype, 'getById').resolves(fakeData.put.getByIdMock);
+      sinon.stub(Logger, 'save').resolves();
+    });
+
+    after(() => {
+      (UserRepository.prototype.update as sinon.SinonStub).restore();
+      (UserRepository.prototype.getById as sinon.SinonStub).restore();
+      (Logger.save as sinon.SinonStub).restore();
+    });
+
+    it('deve retornar a mensagem do erro e enviar status 500', async () => {
+      // id = 2 -> ragnar
+      const { status, body } = await chai.request(app).put('/user/2').send(fakeData.post.request);
+
+      expect(status).to.be.equal(500);
+      expect(body).to.have.property('error');
+      expect(body.error.message).to.be.equal('db error');
+      expect((Logger.save as sinon.SinonStub).calledWith('update() fail')).to.be.true;
+    });
+  });
+
+  // não chega a acessar o controller, é parado no middleware, então não precisa de mocks
+  describe('caso o firstName não seja string', () => {
+    it('deve retornar a mensagem do erro e enviar status 400', async () => {
+      // id = 2 -> ragnar
+      const { status, body } = await chai
+        .request(app)
+        .put('/user/2')
+        .send({ ...fakeData.put.request, firstName: 999 });
+
+      expect(status).to.be.equal(400);
+      expect(body).to.have.property('error');
+      expect(body.error.message).to.be.equal('"firstName" must be a string');
+    });
+  });
+
+  // não chega a acessar o controller, é parado no middleware, então não precisa de mocks
+  describe('caso o lastName não seja string', () => {
+    it('deve retornar a mensagem do erro e enviar status 400', async () => {
+      // id = 2 -> ragnar
+      const { status, body } = await chai
+        .request(app)
+        .put('/user/2')
+        .send({ ...fakeData.put.request, lastName: 999 });
+
+      expect(status).to.be.equal(400);
+      expect(body).to.have.property('error');
+      expect(body.error.message).to.be.equal('"lastName" must be a string');
+    });
+  });
+
+  // não chega a acessar o controller, é parado no middleware, então não precisa de mocks
+  describe('caso o email não seja string', () => {
+    it('deve retornar a mensagem do erro e enviar status 400', async () => {
+      // id = 2 -> ragnar
+      const { status, body } = await chai
+        .request(app)
+        .put('/user/2')
+        .send({ ...fakeData.put.request, email: 999 });
+
+      expect(status).to.be.equal(400);
+      expect(body).to.have.property('error');
+      expect(body.error.message).to.be.equal('"email" must be a string');
+    });
+  });
+
+  describe('caso o email não seja um email válido (homer@.co)', () => {
+    it('deve retornar a mensagem do erro e enviar status 400', async () => {
+      // id = 2 -> ragnar
+      const { status, body } = await chai
+        .request(app)
+        .put('/user/2')
+        .send({ ...fakeData.put.request, email: 'homer@.co' });
+
+      expect(status).to.be.equal(400);
+      expect(body).to.have.property('error');
+      expect(body.error.message).to.be.equal('"email" must be a valid email');
+    });
+  });
+
+  // não chega a acessar o controller, é parado no middleware, então não precisa de mocks
+  describe('caso o occupation não seja string', () => {
+    it('deve retornar a mensagem do erro e enviar status 400', async () => {
+      // id = 2 -> ragnar
+      const { status, body } = await chai
+        .request(app)
+        .put('/user/2')
+        .send({ ...fakeData.put.request, occupation: 999 });
+
+      expect(status).to.be.equal(400);
+      expect(body).to.have.property('error');
+      expect(body.error.message).to.be.equal('"occupation" must be a string');
+    });
+  });
+});

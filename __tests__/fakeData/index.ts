@@ -16,6 +16,14 @@ const ragnar: IUser = {
   occupation: 'king',
 };
 
+const updatedRagnar: IUser = {
+  id: 2,
+  firstName: 'Bjorn',
+  lastName: 'Ironside',
+  email: 'ragnar@gmail.com',
+  occupation: 'king',
+};
+
 const eren: IUser = {
   id: 3,
   firstName: 'Eren',
@@ -51,4 +59,14 @@ export const post = {
     occupation: morty.occupation,
   },
   response: morty,
+};
+
+export const put = {
+  getByIdMock: ragnar,
+  mock: updatedRagnar,
+  request: {
+    firstName: updatedRagnar.firstName,
+    lastName: updatedRagnar.lastName,
+  },
+  response: updatedRagnar,
 };
