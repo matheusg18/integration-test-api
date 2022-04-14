@@ -41,3 +41,14 @@ export const getId = {
   mock: eren,
   response: eren,
 };
+
+export const post = {
+  mock: morty,
+  request: {
+    firstName: morty.firstName,
+    lastName: morty.lastName,
+    email: morty.email,
+    occupation: morty.occupation,
+  },
+  response: morty,
+};
