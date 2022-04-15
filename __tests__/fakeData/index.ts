@@ -70,3 +70,7 @@ export const put = {
   },
   response: updatedRagnar,
 };
+
+export const _delete = {
+  mock: homer,
+};
